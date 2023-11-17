@@ -41,9 +41,9 @@ int main(){
 
     
 
-    int thread_id1 = pthread_create(&thread1, NULL, &method, NULL);
-    int thread_id2 = pthread_create(&thread2, NULL, &method, NULL);
-    int thread_id3 = pthread_create(&thread3, NULL, &method, NULL);
+    pthread_create(&thread1, NULL, &method, NULL);
+    pthread_create(&thread2, NULL, &method, NULL);
+    pthread_create(&thread3, NULL, &method, NULL);
 
     void *t_count1;
     void *t_count2;
