@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <semaphore.h>
 #include <sys/mman.h>
+#include <asm-generic/fcntl.h> //remove this if on a Mac.
+#include <sys/stat.h>
+#include <sys/wait.h>
 
 // struct Buffer is shares between the different processes
 struct Buffer{
@@ -23,9 +26,7 @@ void writer_method(struct Buffer *buffer_ptr);
 
 int main(){
 
-    //Create semaphores for locking the shared variables during critical parts
-    sem_t *sem_read = sem_open("/sem_read", O_CREAT, S_IRUSR | S_IWUSR, 1);
-    sem_t *sem_write = sem_open("/sem_write", O_CREAT, S_IRUSR | S_IWUSR, 1);
+    
 
     //Create a shared memory for the processes
     int shm_fd = shm_open("/shared_memory", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
@@ -42,6 +43,9 @@ int main(){
     // Map the shared memory to the struct Buffer
     struct Buffer *buffer_ptr = mmap(NULL, sizeof(struct Buffer), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
+    //Create semaphores for locking the shared variables during critical parts
+    buffer_ptr -> sem_read = sem_open("/sem_read", O_CREAT, S_IRUSR | S_IWUSR, 1);
+    buffer_ptr -> sem_write = sem_open("/sem_write", O_CREAT, S_IRUSR | S_IWUSR, 1);
     //TODO - handle mmapp error
 
     //Fork a child process
