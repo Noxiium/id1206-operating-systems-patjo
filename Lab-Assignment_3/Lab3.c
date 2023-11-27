@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define TLB_ENTRIES_SIZE 16
 #define PAGE_SIZE 256
@@ -35,6 +36,11 @@ int main(int argc, char *argv[]){
     //Open files for logical addresses and backing store.
     FILE *logical_addresses = fopen((argv[1]), "rb");
     FILE *backing_store = fopen("BACKING_STORE.bin", "rb");
+
+     if (logical_addresses == NULL || backing_store == NULL ) {
+        perror("fopen");
+        exit(EXIT_FAILURE); 
+    }
 
     //Read logical addresses from the file received as an argument in main. (addresses.txt)
     while (fscanf(logical_addresses, "%u", &address) != EOF){
