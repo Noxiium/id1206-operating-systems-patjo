@@ -3,6 +3,7 @@
 #include <time.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #define CYLINDER_REQUESTS 1000
 #define DISK_FIRST_CYLINDER_INDEX 0
@@ -26,22 +27,27 @@ int main(int argc, char *argv[])
     printf("Head start position: %d\n", head_position);
 
     int request_queue[CYLINDER_REQUESTS];
+    int used_numbers[5000] = {0};  // Array to keep track of used numbers, initialized to 0
 
     srand(time(0));
 
-    // Fill the array with random numbers between 0 and 4999
-    for (int i = 0; i < CYLINDER_REQUESTS; i++)
-    {
-        request_queue[i] = rand() % 5000; // Generates numbers from 0 to 4999
-    }
+    for (int i = 0; i < CYLINDER_REQUESTS; i++) {
+        int new_number;
+        do {
+            new_number = rand() % 5000;
+        } while (used_numbers[new_number] == 1);  // Check if the number has already been used
 
+        request_queue[i] = new_number;
+        used_numbers[new_number] = 1;  // Mark the number as used
+    }
+    
     int test[] = {3, 5, 10, 1, 7, 20};
-    //FCFS(head_position, request_queue);
-    //SSTF(head_position, request_queue);
-    //SCAN(head_position, request_queue);
-    //C_SCAN(head_position, request_queue);
+    FCFS(head_position, request_queue);
+    SSTF(head_position, request_queue);
+    SCAN(head_position, request_queue);
+    C_SCAN(head_position, request_queue);
     LOOK(head_position, request_queue);
-    //C_LOOK(head_position, request_queue);
+    C_LOOK(head_position, request_queue);
 }
 
 // FCFS
@@ -238,7 +244,6 @@ void LOOK(int head_position, int request_queue[]){
     for (int i = 0; i < CYLINDER_REQUESTS; i++){
         if (head_position < copy_queue[i]){
             index = i;
-            printf("first index = %d\n", index);
             break;
         }
     }
@@ -249,7 +254,6 @@ void LOOK(int head_position, int request_queue[]){
         int diff = 0;
         if (head_position == copy_queue[index-1])
         {
-            printf("head found, index =%d\n", index);
             diff = abs(current_head_position - copy_queue[index - 1]);
             head_movements += diff;
             current_head_position = head_position;
@@ -257,13 +261,10 @@ void LOOK(int head_position, int request_queue[]){
             index--;
         }
         if (index == 0){
-            //printf("left = false\n");
             left = false;
             break;
         }
         head_position--;
-        //printf("head: %d\n", head_position);
-        //printf("index: %d\n", index);
     }
     while (!left){
 
@@ -279,11 +280,10 @@ void LOOK(int head_position, int request_queue[]){
             copy_queue[index] = -1;
             index++;
         }
-         if (index == CYLINDER_REQUESTS)
+         if (index == CYLINDER_REQUESTS || head_movements == DISK_LAST_CYLINDER_INDEX)
             break;
 
         head_position++;
-        printf("head: %d\n", head_position);
     }
     printf("Head movements required for LOOK: %d\n", head_movements);
 }
